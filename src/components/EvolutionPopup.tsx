@@ -3,6 +3,7 @@ import axios from 'axios';
 
 interface EvolutionPopupProps {
     pokemonId: string;
+    pokemonDetails: Pokemon; // Utilisez 'Pokemon' si c'est le type correct pour les détails
     onClose: () => void;
 }
 
@@ -11,15 +12,27 @@ interface EvolutionChain {
     evolves_to: EvolutionChain[];
 }
 
-const EvolutionPopup = ({ pokemonId, onClose }: EvolutionPopupProps) => {
+
+
+interface Pokemon {
+    name: string;
+    url: string;
+    imageUrl: string;
+    types: string[];
+}
+
+const EvolutionPopup = ({ pokemonId, pokemonDetails, onClose }: EvolutionPopupProps) => {
     const [evolutionChain, setEvolutionChain] = useState<EvolutionChain | null>(null);
 
     useEffect(() => {
         const fetchEvolutionChain = async () => {
             try {
-                const evolutionChainId = pokemonId;
-                const response = await axios.get(`https://pokeapi.co/api/v2/evolution-chain/${evolutionChainId}`);
-                setEvolutionChain(response.data.chain);
+                const idMatch = pokemonId.match(/pokemon\/(\d+)\//);
+                if (idMatch) {
+                    const id = idMatch[1];
+                    const response = await axios.get(`/api/evolution-chain/${id}`);
+                    setEvolutionChain(response.data.chain);
+                }
             } catch (error) {
                 console.error("Erreur lors de la récupération de la chaîne d'évolution:", error);
             }
@@ -43,8 +56,21 @@ const EvolutionPopup = ({ pokemonId, onClose }: EvolutionPopupProps) => {
 
     return (
         <div className="evolution-popup">
-            <h2>Chaîne d'évolution</h2>
-            {evolutionChain ? renderEvolutionChain(evolutionChain) : <p>Chargement...</p>}
+            <div className="pokemon-details">
+                <h2>Informations sur {pokemonDetails.name}</h2>
+                <img src={pokemonDetails.imageUrl} alt={pokemonDetails.name} />
+                <p>Types: {pokemonDetails.types.join(', ')}</p>
+            </div>
+            <div className="evolution-chain">
+                <h2>Évolutions</h2>
+                {evolutionChain ? (
+                    evolutionChain.evolves_to.map((evolve, index) => (
+                        <p key={index}>{evolve.species_name}</p>
+                    ))
+                ) : (
+                    <p>Chargement des évolutions...</p>
+                )}
+            </div>
             <button onClick={onClose}>Fermer</button>
         </div>
     );

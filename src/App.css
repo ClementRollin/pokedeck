@@ -50,3 +50,62 @@
     padding: 2rem;
     text-align: center;
 }
+.evolution-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 600px;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+.search-bar {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.search-input {
+    width: 300px;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s;
+}
+
+.search-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #999;
+}
+.evolution-popup .pokemon-details,
+.evolution-popup .evolution-chain {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.evolution-popup .evolution-chain {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.evolution-popup .pokemon-details {
+    text-align: center;
+}
+
+.evolution-popup .pokemon-details img {
+    width: 150px;
+    height: auto;
+    margin: 10px 0;
+}
