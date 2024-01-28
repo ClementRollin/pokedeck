@@ -1,28 +1,20 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import {Pokemon} from "./PokeList.tsx";
 
 interface EvolutionPopupProps {
     pokemonId: string;
-    pokemonDetails: Pokemon; // Utilisez 'Pokemon' si c'est le type correct pour les détails
+    pokemonDetails: Pokemon;
     onClose: () => void;
 }
 
-interface EvolutionChain {
-    species_name: string;
-    evolves_to: EvolutionChain[];
-}
-
-
-
-interface Pokemon {
+interface EvolutionDetail {
     name: string;
-    url: string;
     imageUrl: string;
-    types: string[];
 }
 
-const EvolutionPopup = ({ pokemonId, pokemonDetails, onClose }: EvolutionPopupProps) => {
-    const [evolutionChain, setEvolutionChain] = useState<EvolutionChain | null>(null);
+const EvolutionPopup = ({ pokemonId, onClose, pokemonDetails }: EvolutionPopupProps) => {
+    const [evolutionDetails, setEvolutionDetails] = useState<EvolutionDetail[]>([]);
 
     useEffect(() => {
         const fetchEvolutionChain = async () => {
@@ -30,8 +22,20 @@ const EvolutionPopup = ({ pokemonId, pokemonDetails, onClose }: EvolutionPopupPr
                 const idMatch = pokemonId.match(/pokemon\/(\d+)\//);
                 if (idMatch) {
                     const id = idMatch[1];
-                    const response = await axios.get(`/api/evolution-chain/${id}`);
-                    setEvolutionChain(response.data.chain);
+                    const response = await axios.get(`https://pokeapi.co/api/v2/evolution-chain/${id}`);
+
+                    const evolutions = [];
+                    let currentEvolution = response.data.chain;
+                    while (currentEvolution && currentEvolution.species) {
+                        const evolutionResponse = await axios.get(currentEvolution.species.url);
+                        const imageUrl = evolutionResponse.data.sprites?.front_default || 'default-image-url.png';
+                        evolutions.push({
+                            name: evolutionResponse.data.name,
+                            imageUrl: imageUrl
+                        });
+                        currentEvolution = currentEvolution.evolves_to[0];
+                    }
+                    setEvolutionDetails(evolutions);
                 }
             } catch (error) {
                 console.error("Erreur lors de la récupération de la chaîne d'évolution:", error);
@@ -41,36 +45,26 @@ const EvolutionPopup = ({ pokemonId, pokemonDetails, onClose }: EvolutionPopupPr
         fetchEvolutionChain();
     }, [pokemonId]);
 
-    const renderEvolutionChain = (chain: EvolutionChain) => {
-        return (
-            <div>
-                <p>{chain.species_name}</p>
-                {chain.evolves_to.map((evolve, index) => (
-                    <div key={index}>
-                        {renderEvolutionChain(evolve)}
-                    </div>
-                ))}
-            </div>
-        );
-    };
-
     return (
         <div className="evolution-popup">
-            <div className="pokemon-details">
-                <h2>Informations sur {pokemonDetails.name}</h2>
-                <img src={pokemonDetails.imageUrl} alt={pokemonDetails.name} />
+            <h2>Détails du Pokémon</h2>
+            <div>
+                <h3>{pokemonDetails.name}</h3>
+                <img src={pokemonDetails.imageUrl} alt={pokemonDetails.name}/>
                 <p>Types: {pokemonDetails.types.join(', ')}</p>
             </div>
-            <div className="evolution-chain">
-                <h2>Évolutions</h2>
-                {evolutionChain ? (
-                    evolutionChain.evolves_to.map((evolve, index) => (
-                        <p key={index}>{evolve.species_name}</p>
-                    ))
-                ) : (
-                    <p>Chargement des évolutions...</p>
-                )}
-            </div>
+            <h2>Évolutions</h2>
+            {evolutionDetails.length > 0 ? (
+                evolutionDetails.map((evolution, index) => (
+                    <div key={index}>
+                        <h4>Évolution {index + 1} : </h4>
+                        <img src={evolution.imageUrl} alt={evolution.name}/>
+                        <p>{evolution.name}</p>
+                    </div>
+                ))
+            ) : (
+                <p>Chargement des évolutions...</p>
+            )}
             <button onClick={onClose}>Fermer</button>
         </div>
     );

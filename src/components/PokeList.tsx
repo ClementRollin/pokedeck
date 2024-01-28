@@ -82,7 +82,7 @@ const PokeList = () => {
                 />
             </div>
             {currentPokemons.map(pokemon => (
-                <div className="lignes" key={pokemon.name}>
+                <div className="pokemonName" key={pokemon.name}>
                     <PokeCard pokemon={pokemon} />
                     <button onClick={() => handleViewEvolutions(pokemon)}>Voir Évolutions</button>
                 </div>
@@ -95,10 +95,7 @@ const PokeList = () => {
             {showEvolutionPopup && selectedPokemon && (
                 <EvolutionPopup
                     pokemonId={selectedPokemon.url}
-                    pokemonDetails={{
-                        ...selectedPokemon,
-                        imageUrl: selectedPokemon.imageUrl || 'default-image-url.png'
-                    }}
+                    pokemonDetails={selectedPokemon}
                     onClose={handleClosePopup}
                 />
             )}
