@@ -10,7 +10,7 @@ export interface Pokemon {
     types: string[];
 }
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 9;
 
 const PokeList = () => {
     const [pokemons, setPokemons] = useState<Pokemon[]>([]);
@@ -21,13 +21,20 @@ const PokeList = () => {
     const [totalPages, setTotalPages] = useState(0);
 
     useEffect(() => {
-        const fetchPokemons = async () => {
-            const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=100');
-            setPokemons(response.data.results);
-        };
+    const fetchPokemons = async () => {
+        const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=100');
+        const pokemonsWithImages = await Promise.all(response.data.results.map(async (pokemon: Pokemon) => {
+            const pokemonResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
+            return {
+                ...pokemon,
+                imageUrl: pokemonResponse.data.sprites.front_default
+            };
+        }));
+        setPokemons(pokemonsWithImages);
+    };
 
-        fetchPokemons();
-    }, []);
+    fetchPokemons();
+}, []);
 
     useEffect(() => {
         const filteredPokemons = pokemons.filter(pokemon =>
@@ -40,10 +47,17 @@ const PokeList = () => {
     const handleViewEvolutions = async (pokemon: Pokemon) => {
         try {
             const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
+
+            const types = await Promise.all(response.data.types.map(async (type: any) => {
+                const typeResponse = await axios.get(type.type.url);
+                const frenchTypeObj = typeResponse.data.names.find((name: { language: { name: string; }; }) => name.language.name === 'fr');
+                return frenchTypeObj ? frenchTypeObj.name : type.type.name;
+            }));
+            
             const pokemonDetails = {
                 ...pokemon,
                 imageUrl: response.data.sprites.front_default || 'default-image-url.png',
-                types: response.data.types.map((typeItem: any) => typeItem.type.name) || []
+                types: types || []
             };
 
             setSelectedPokemon(pokemonDetails);
@@ -81,12 +95,14 @@ const PokeList = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
-            {currentPokemons.map(pokemon => (
-                <div className="pokemonName" key={pokemon.name}>
-                    <PokeCard pokemon={pokemon} />
-                    <button onClick={() => handleViewEvolutions(pokemon)}>Voir Évolutions</button>
-                </div>
-            ))}
+            <div className="pokemonList">
+                {currentPokemons.map(pokemon => (
+                        <div className="pokemonName" key={pokemon.name}>
+                            <PokeCard pokemon={pokemon} />
+                            <button onClick={() => handleViewEvolutions(pokemon)}>Voir Évolutions</button>
+                        </div>
+                ))}
+            </div>
             <div className="pagination">
                 <button onClick={goToPreviousPage} disabled={currentPage === 1}>Précédent</button>
                 <span>Page {currentPage} sur {totalPages}</span>

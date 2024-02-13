@@ -1,11 +1,11 @@
-import PokeList from "./components/PokeList.tsx"; // Importez votre composant PokeList
+import PokeList from "./components/PokeList.tsx";
 import './App.css';
 
 function App() {
     return (
         <>
-            <h1>Pokedeck</h1>
-            <PokeList /> {/* Affiche la liste des Pokémon */}
+            <h1>Pokedex</h1>
+            <PokeList />
             <p className="read-the-docs">
                 Découvrez les différents Pokémon !
             </p>

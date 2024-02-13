@@ -1,3 +1,8 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -11,9 +16,12 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
+  transform: scale(1.1);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -35,31 +43,39 @@
 
 .card {
   padding: 2em;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .read-the-docs {
   color: #888;
 }
+
 .pokemonName {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: center;
-    margin: 0 auto;
-    max-width: 1280px;
-    padding: 2rem;
-    text-align: center;
+  width: calc(33.33% - 20px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  margin: 10px;
+  margin-bottom: 50px;
+  text-align: center;
 }
-/* Style de base pour la popup */
+
 .evolution-popup {
   position: fixed;
+  height: 100%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 50%;
-  max-width: 90%;
   max-height: 80%;
-  overflow-y: auto;
   background-color: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
@@ -68,15 +84,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: transform 0.3s ease;
 }
 
-/* Style pour le titre de la popup */
 .evolution-popup h2 {
   color: #333;
   margin-bottom: 20px;
 }
 
-/* Style pour les détails du Pokémon */
 .evolution-popup .pokemon-details {
   text-align: center;
 }
@@ -97,13 +112,11 @@
   color: #666;
 }
 
-/* Style pour la liste des évolutions */
 .evolution-popup .evolution-chain h4 {
   margin-top: 20px;
   color: #444;
 }
 
-/* Bouton de fermeture */
 .evolution-popup button {
   margin-top: 20px;
   padding: 10px 20px;
@@ -120,38 +133,50 @@
 }
 
 .evolutionPokemon {
-    width: 80%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: center;
-    margin: 0 auto;
-    max-width: 1280px;
-    padding: 2rem;
-    text-align: center;
+  width: 80%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 1280px;
+  padding: 2rem;
+  text-align: center;
 }
 
 .search-bar {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
 }
 
 .search-input {
-    width: 300px;
-    padding: 10px;
-    border: 2px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: border-color 0.3s;
+  width: 300px;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .search-input:focus {
-    border-color: #007bff;
-    outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+  outline: none;
 }
 
 .search-input::placeholder {
-    color: #999;
+  color: #999;
+}
+
+.pokemonList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 1280px;
+  padding: 2rem;
+  text-align: center;
 }
