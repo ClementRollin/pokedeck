@@ -58,8 +58,9 @@ body {
 }
 
 .pokemonName {
-  width: calc(33.33% - 20px);
+  min-width: 25%;
   display: flex;
+  flex-wrap: wrap;
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
