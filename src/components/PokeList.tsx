@@ -4,6 +4,7 @@ import PokeCard from './PokeCard';
 import EvolutionPopup from './EvolutionPopup';
 
 export interface Pokemon {
+    evolutionChainId: any;
     name: string;
     url: string;
     imageUrl?: string;
@@ -47,17 +48,15 @@ const PokeList = () => {
     const handleViewEvolutions = async (pokemon: Pokemon) => {
         try {
             const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
-
-            const types = await Promise.all(response.data.types.map(async (type: any) => {
-                const typeResponse = await axios.get(type.type.url);
-                const frenchTypeObj = typeResponse.data.names.find((name: { language: { name: string; }; }) => name.language.name === 'fr');
-                return frenchTypeObj ? frenchTypeObj.name : type.type.name;
-            }));
+            const speciesResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.name}`);
+            const evolutionChainUrl = speciesResponse.data.evolution_chain.url;
+            const evolutionChainId = evolutionChainUrl.split('/')[6];
             
             const pokemonDetails = {
                 ...pokemon,
                 imageUrl: response.data.sprites.front_default || 'default-image-url.png',
-                types: types || []
+                types: response.data.types.map((typeItem: any) => typeItem.type.name) || [],
+                evolutionChainId: evolutionChainId
             };
 
             setSelectedPokemon(pokemonDetails);

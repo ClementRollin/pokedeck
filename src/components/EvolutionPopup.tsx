@@ -22,18 +22,14 @@ interface EvolutionDetail {
     types: string[];
 }
 
-const EvolutionPopup: React.FC<EvolutionPopupProps> = ({ pokemonId, pokemonDetails, onClose }) => {
+const EvolutionPopup: React.FC<EvolutionPopupProps> = ({ pokemonDetails, onClose }) => {
     const [evolutionDetails, setEvolutionDetails] = useState<EvolutionDetail[]>([]);
 
     useEffect(() => {
         const fetchEvolutionChain = async () => {
             try {
-                const idMatch = pokemonId.match(/\/(\d+)\//);
-                if (idMatch) {
-                    const id = idMatch[1];
-                    const { data } = await axios.get(`https://pokeapi.co/api/v2/evolution-chain/${id}/`);
-                    await processEvolutionChain(data.chain);
-                }
+                const { data } = await axios.get(`https://pokeapi.co/api/v2/evolution-chain/${pokemonDetails.evolutionChainId}/`);
+                await processEvolutionChain(data.chain);
             } catch (error) {
                 console.error("Erreur lors de la récupération de la chaîne d'évolution:", error);
             }
@@ -72,7 +68,7 @@ const EvolutionPopup: React.FC<EvolutionPopupProps> = ({ pokemonId, pokemonDetai
         };
 
         fetchEvolutionChain();
-    }, [pokemonId]);
+    }, [pokemonDetails]);
 
     return (
         <div className="evolution-popup">
