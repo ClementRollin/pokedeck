@@ -6,9 +6,6 @@ function App() {
         <>
             <h1>Pokedex</h1>
             <PokeList />
-            <p className="read-the-docs">
-                Découvrez les différents Pokémon !
-            </p>
         </>
     );
 }

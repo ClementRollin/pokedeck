@@ -9,6 +9,7 @@ export interface Pokemon {
     url: string;
     imageUrl?: string;
     types: string[];
+    stats?: { [key: string]: number };
 }
 
 const ITEMS_PER_PAGE = 9;
@@ -19,31 +20,75 @@ const PokeList = () => {
     const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
     const [showEvolutionPopup, setShowEvolutionPopup] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(0);
+    const [, setIsLoading] = useState(false);
+    const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
-    useEffect(() => {
-    const fetchPokemons = async () => {
-        const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=100');
-        const pokemonsWithImages = await Promise.all(response.data.results.map(async (pokemon: Pokemon) => {
-            const pokemonResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
-            return {
-                ...pokemon,
-                imageUrl: pokemonResponse.data.sprites.front_default
-            };
-        }));
-        setPokemons(pokemonsWithImages);
+    const pokemonTypes = ['feu', 'eau', 'plante', 'vol', 'insecte', 'poison', 'normal', 'électrik', 'sol', 'fée', 'combat', 'psy', 'roche', 'acier', 'glace', 'spectre'];
+
+    const pokemonTypeMapping: { [key: string]: string } = {
+        'feu': 'fire',
+        'eau': 'water',
+        'plante': 'grass',
+        'vol': 'flying',
+        'insecte': 'bug',
+        'poison': 'poison',
+        'normal': 'normal',
+        'électrik': 'electric',
+        'sol': 'ground',
+        'fée': 'fairy',
+        'combat': 'fighting',
+        'psy': 'psychic',
+        'roche': 'rock',
+        'acier': 'steel',
+        'glace': 'ice',
+        'spectre': 'ghost'
     };
 
-    fetchPokemons();
-}, []);
+    const [allDataLoaded, setAllDataLoaded] = useState(false);
 
     useEffect(() => {
-        const filteredPokemons = pokemons.filter(pokemon =>
-            pokemon.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setTotalPages(Math.ceil(filteredPokemons.length / ITEMS_PER_PAGE));
+        const fetchPokemons = async () => {
+            setIsLoading(true);
+            const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=100');
+            const pokemonsWithImages = await Promise.all(response.data.results.map(async (pokemon: Pokemon) => {
+                const pokemonResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
+                const types = pokemonResponse.data.types.map((type: any) => type.type.name);
+                return {
+                    ...pokemon,
+                    imageUrl: pokemonResponse.data.sprites.front_default,
+                    types: types
+                };
+            }));
+            setPokemons(pokemonsWithImages);
+            setIsLoading(false);
+            setAllDataLoaded(true);
+        };
+
+        if (!allDataLoaded) {
+            fetchPokemons();
+        }
+    }, [allDataLoaded]);
+
+    useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, pokemons]);
+    }, [typeFilter]);
+
+    const filteredPokemons = typeFilter ? pokemons.filter(pokemon => pokemon.types.includes(pokemonTypeMapping[typeFilter])) : pokemons;
+
+    const totalPages = Math.ceil(filteredPokemons.length / ITEMS_PER_PAGE);
+
+    const currentPokemons = filteredPokemons.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
+    const goToPreviousPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const goToNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
 
     const handleViewEvolutions = async (pokemon: Pokemon) => {
         try {
@@ -51,12 +96,24 @@ const PokeList = () => {
             const speciesResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.name}`);
             const evolutionChainUrl = speciesResponse.data.evolution_chain.url;
             const evolutionChainId = evolutionChainUrl.split('/')[6];
-            
+
+            const types = await Promise.all(response.data.types.map(async (type: any) => {
+                const typeResponse = await axios.get(type.type.url);
+                const frenchTypeObj = typeResponse.data.names.find((name: { language: { name: string; }; }) => name.language.name === 'fr');
+                return frenchTypeObj ? frenchTypeObj.name : type.type.name;
+            }));
+
+            const stats = response.data.stats.reduce((acc: { [x: string]: any; }, stat: { stat: { name: any; }; base_stat: any; }) => {
+                acc[stat.stat.name] = stat.base_stat;
+                return acc;
+            }, {});
+
             const pokemonDetails = {
                 ...pokemon,
                 imageUrl: response.data.sprites.front_default || 'default-image-url.png',
-                types: response.data.types.map((typeItem: any) => typeItem.type.name) || [],
-                evolutionChainId: evolutionChainId
+                types: types || [],
+                evolutionChainId: evolutionChainId,
+                stats: stats
             };
 
             setSelectedPokemon(pokemonDetails);
@@ -64,24 +121,14 @@ const PokeList = () => {
         } catch (error) {
             console.error("Erreur lors de la récupération des détails du Pokémon:", error);
         }
+        document.body.style.overflow = 'hidden';
     };
 
     const handleClosePopup = () => {
         setShowEvolutionPopup(false);
         setSelectedPokemon(null);
+        document.body.style.overflow = 'auto';
     };
-
-    const goToNextPage = () => {
-        setCurrentPage(currentPage => Math.min(currentPage + 1, totalPages));
-    };
-
-    const goToPreviousPage = () => {
-        setCurrentPage(currentPage => Math.max(currentPage - 1, 1));
-    };
-
-    const currentPokemons = pokemons
-        .filter(pokemon => pokemon.name.toLowerCase().includes(searchTerm.toLowerCase()))
-        .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     return (
         <div>
@@ -94,18 +141,26 @@ const PokeList = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
+            <div className="filter-bar">
+                <select onChange={(e) => setTypeFilter(e.target.value)}>
+                    <option value="">Tous les types</option>
+                    {pokemonTypes.map(type => (
+                        <option value={type}>{type}</option>
+                    ))}
+                </select>
+            </div>
             <div className="pokemonList">
                 {currentPokemons.map(pokemon => (
-                        <div className="pokemonName" key={pokemon.name}>
-                            <PokeCard pokemon={pokemon} />
-                            <button onClick={() => handleViewEvolutions(pokemon)}>Voir Évolutions</button>
-                        </div>
+                    <div className="pokemonName" key={pokemon.name}>
+                        <PokeCard pokemon={pokemon} />
+                        <button onClick={() => handleViewEvolutions(pokemon)}>Voir Évolutions</button>
+                    </div>
                 ))}
             </div>
             <div className="pagination">
-                <button onClick={goToPreviousPage} disabled={currentPage === 1}>Précédent</button>
-                <span>Page {currentPage} sur {totalPages}</span>
-                <button onClick={goToNextPage} disabled={currentPage === totalPages}>Suivant</button>
+                <button onClick={goToPreviousPage} hidden={currentPage === 1}>Précédent</button>
+                <span className='nombrePage'>Page {currentPage} sur {totalPages}</span>
+                <button onClick={goToNextPage} hidden={currentPage === totalPages}>Suivant</button>
             </div>
             {showEvolutionPopup && selectedPokemon && (
                 <EvolutionPopup
