@@ -155,8 +155,18 @@ const PokeList = () => {
         }
     };
 
+    const generateRandomTeam = () => {
+        const randomTeam = [];
+        for (let i = 0; i < 6; i++) {
+            const randomIndex = Math.floor(Math.random() * pokemons.length);
+            randomTeam.push(pokemons[randomIndex].name);
+        }
+        setTeam(randomTeam);
+        localStorage.setItem('team', JSON.stringify(randomTeam));
+    };
+
     const handleAddToTeam = (pokemonName: string) => {
-        if (team.length < 5 && !team.includes(pokemonName)) {
+        if (team.length < 6 && !team.includes(pokemonName)) {
             const newTeam = [...team, pokemonName];
             setTeam(newTeam);
             localStorage.setItem('team', JSON.stringify(newTeam));
@@ -231,6 +241,11 @@ const PokeList = () => {
                             <option key="asc" value="asc">Ordre alphabétique (A-Z)</option>
                             <option key="desc" value="desc">Ordre alphabétique inversé (Z-A)</option>
                         </select>
+                        {team.length === 0 && (
+                            <div className='pokeTeam'>
+                                <button onClick={generateRandomTeam}>Générer une équipe aléatoire</button>
+                            </div>
+                        )}
                         {team.length > 0 && (
                             <div className='pokeTeam'>
                                 <button onClick={removeLastPokemon}>Supprimer le dernier Pokémon</button>
@@ -238,14 +253,18 @@ const PokeList = () => {
                             </div>
                         )}
                     </div>
-                    <div className="pokemonList">
-                        {currentPokemons.map(pokemon => (
-                            <div className="pokemonName" key={pokemon.name}>
-                                <PokeCard pokemon={pokemon} />
-                                <button onClick={() => handleViewEvolutions(pokemon)}>Voir Ses Caractéristiques</button>
-                            </div>
-                        ))}
-                    </div>
+                    {filteredPokemons.length === 0 ? (
+                        <p>Désolé, aucun Pokémon ne correspond à votre recherche.</p>
+                    ) : (
+                        <div className="pokemonList">
+                            {currentPokemons.map(pokemon => (
+                                <div className="pokemonName" key={pokemon.name}>
+                                    <PokeCard pokemon={pokemon} />
+                                    <button onClick={() => handleViewEvolutions(pokemon)}>Voir Ses Caractéristiques</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                     <div className="pagination">
                         <button onClick={goToPreviousPage} hidden={currentPage === 1}>Précédent</button>
                         <span className='nombrePage'>Page {currentPage} sur {totalPages}</span>
