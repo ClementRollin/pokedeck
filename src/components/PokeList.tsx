@@ -6,6 +6,7 @@ import EvolutionPopup from './EvolutionPopup';
 export interface Pokemon {
     evolutionChainId: any;
     name: string;
+    englishName?: string;
     url: string;
     imageUrl?: string;
     types: string[];
@@ -22,6 +23,7 @@ const PokeList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [, setIsLoading] = useState(false);
     const [typeFilter, setTypeFilter] = useState<string | null>(null);
+    const [sortOrder, setSortOrder] = useState<string | null>(null);
 
     const pokemonTypes = ['feu', 'eau', 'plante', 'vol', 'insecte', 'poison', 'normal', 'électrik', 'sol', 'fée', 'combat', 'psy', 'roche', 'acier', 'glace', 'spectre'];
 
@@ -53,12 +55,26 @@ const PokeList = () => {
             const pokemonsWithImages = await Promise.all(response.data.results.map(async (pokemon: Pokemon) => {
                 const pokemonResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
                 const types = pokemonResponse.data.types.map((type: any) => type.type.name);
+                const speciesResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.name}`);
+                const frenchNameObj = speciesResponse.data.names.find((name: { language: { name: string; }; }) => name.language.name === 'fr');
+                const frenchName = frenchNameObj ? frenchNameObj.name : pokemon.name;
+                const evolutionChainResponse = await axios.get(speciesResponse.data.evolution_chain.url);
+                let evolutionStage = 1;
+                let currentEvolution = evolutionChainResponse.data.chain;
+                while (currentEvolution && currentEvolution.species.name !== pokemon.name) {
+                    currentEvolution = currentEvolution.evolves_to[0];
+                    evolutionStage++;
+                }
                 return {
                     ...pokemon,
                     imageUrl: pokemonResponse.data.sprites.front_default,
-                    types: types
+                    types: types,
+                    name: frenchName,
+                    englishName: pokemon.name,
+                    evolutionStage: evolutionStage
                 };
             }));
+        
             setPokemons(pokemonsWithImages);
             setIsLoading(false);
             setAllDataLoaded(true);
@@ -71,13 +87,23 @@ const PokeList = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [typeFilter]);
+    }, [typeFilter, sortOrder]);
 
     const filteredPokemons = typeFilter ? pokemons.filter(pokemon => pokemon.types.includes(pokemonTypeMapping[typeFilter])) : pokemons;
 
-    const totalPages = Math.ceil(filteredPokemons.length / ITEMS_PER_PAGE);
+    const sortedPokemons = [...filteredPokemons].sort((a, b) => {
+        if (sortOrder === 'asc') {
+            return a.name.localeCompare(b.name);
+        } else if (sortOrder === 'desc') {
+            return b.name.localeCompare(a.name);
+        } else {
+            return 0;
+        }
+    });
 
-    const currentPokemons = filteredPokemons.slice(
+    const totalPages = Math.ceil(sortedPokemons.length / ITEMS_PER_PAGE);
+
+    const currentPokemons = sortedPokemons.slice(
         (currentPage - 1) * ITEMS_PER_PAGE,
         currentPage * ITEMS_PER_PAGE
     );
@@ -92,8 +118,8 @@ const PokeList = () => {
 
     const handleViewEvolutions = async (pokemon: Pokemon) => {
         try {
-            const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
-            const speciesResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.name}`);
+            const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.englishName}`);
+            const speciesResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.englishName}`);
             const evolutionChainUrl = speciesResponse.data.evolution_chain.url;
             const evolutionChainId = evolutionChainUrl.split('/')[6];
 
@@ -120,8 +146,10 @@ const PokeList = () => {
             setShowEvolutionPopup(true);
         } catch (error) {
             console.error("Erreur lors de la récupération des détails du Pokémon:", error);
+        } finally {
+            setShowEvolutionPopup(true);
+            document.body.style.overflow = 'hidden';
         }
-        document.body.style.overflow = 'hidden';
     };
 
     const handleClosePopup = () => {
@@ -148,12 +176,17 @@ const PokeList = () => {
                         <option value={type}>{type}</option>
                     ))}
                 </select>
+                <select onChange={(e) => setSortOrder(e.target.value)}>
+                    <option value="">Trier par...</option>
+                    <option value="asc">Ordre alphabétique (A-Z)</option>
+                    <option value="desc">Ordre alphabétique inversé (Z-A)</option>
+                </select>
             </div>
             <div className="pokemonList">
                 {currentPokemons.map(pokemon => (
                     <div className="pokemonName" key={pokemon.name}>
                         <PokeCard pokemon={pokemon} />
-                        <button onClick={() => handleViewEvolutions(pokemon)}>Voir Évolutions</button>
+                        <button onClick={() => handleViewEvolutions(pokemon)}>Voir Ses Caractéristiques</button>
                     </div>
                 ))}
             </div>

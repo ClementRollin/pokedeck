@@ -7,7 +7,7 @@ const PokeCard = ({ pokemon }: { pokemon: any }) => {
     useEffect(() => {
         const fetchPokemonSpecies = async () => {
             try {
-                const response = await axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.name}`);
+                const response = await axios.get(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.englishName}`);
                 const frenchNameObj = response.data.names.find((name: { language: { name: string } }) => name.language.name === 'fr');
                 if (frenchNameObj) {
                     setFrenchName(frenchNameObj.name);
