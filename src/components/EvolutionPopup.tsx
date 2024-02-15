@@ -6,6 +6,7 @@ interface EvolutionPopupProps {
     pokemonId: string;
     onClose: () => void;
     pokemonDetails: Pokemon;
+    onAddToTeam: (pokemonName: string) => void;
 }
 
 interface EvolutionNode {
@@ -22,7 +23,7 @@ interface EvolutionDetail {
     types: string[];
 }
 
-const EvolutionPopup: React.FC<EvolutionPopupProps> = ({ pokemonDetails, onClose }) => {
+const EvolutionPopup: React.FC<EvolutionPopupProps> = ({ pokemonDetails, onClose, onAddToTeam }) => {
     const [evolutionDetails, setEvolutionDetails] = useState<EvolutionDetail[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -82,6 +83,7 @@ const EvolutionPopup: React.FC<EvolutionPopupProps> = ({ pokemonDetails, onClose
                 <div>
                     <img src={pokemonDetails.imageUrl} alt={pokemonDetails.name} />
                     <p>Types: {pokemonDetails.types.join(', ')}</p>
+                    <button onClick={() => onAddToTeam(pokemonDetails.name)}>Ajouter à mon équipe</button>
                 </div>
                 <div>
                     <h3>Statistiques</h3>

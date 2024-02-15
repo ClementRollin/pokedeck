@@ -21,9 +21,10 @@ const PokeList = () => {
     const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
     const [showEvolutionPopup, setShowEvolutionPopup] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [typeFilter, setTypeFilter] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<string | null>(null);
+    const [team, setTeam] = useState<string[]>([]);
 
     const pokemonTypes = ['feu', 'eau', 'plante', 'vol', 'insecte', 'poison', 'normal', 'électrik', 'sol', 'fée', 'combat', 'psy', 'roche', 'acier', 'glace', 'spectre'];
 
@@ -152,6 +153,49 @@ const PokeList = () => {
         }
     };
 
+    const handleAddToTeam = (pokemonName: string) => {
+        if (team.length < 5 && !team.includes(pokemonName)) {
+            const newTeam = [...team, pokemonName];
+            setTeam(newTeam);
+            localStorage.setItem('team', JSON.stringify(newTeam));
+        } else if (team.includes(pokemonName)) {
+            console.log(pokemonName + ' est déjà dans votre équipe.');
+        } else {
+            console.log('Votre équipe est déjà complète.');
+        }
+    };
+
+    const removeLastPokemon = () => {
+        const newTeam = [...team];
+        newTeam.pop();
+        setTeam(newTeam);
+        localStorage.setItem('team', JSON.stringify(newTeam));
+    };
+    
+    const clearTeam = () => {
+        setTeam([]);
+        localStorage.removeItem('team');
+    };
+
+    useEffect(() => {
+        const storedTeam = localStorage.getItem('team');
+        if (storedTeam) {
+            const teamFromStorage = JSON.parse(storedTeam);
+            setTeam(teamFromStorage);
+        }
+    }, []);
+    
+    useEffect(() => {
+        if (team.length > 0) {
+            console.clear();
+            const teamString = 'Votre équipe est :\n' + team.map(pokemonName => '- ' + pokemonName).join('\n');
+            console.log(teamString);
+        } else {
+            console.clear();
+            console.log('Compose ton équipe maintenant !');
+        }
+    }, [team]);
+
     const handleClosePopup = () => {
         setShowEvolutionPopup(false);
         setSelectedPokemon(null);
@@ -160,47 +204,60 @@ const PokeList = () => {
 
     return (
         <div>
-            <div className="search-bar">
-                <input
-                    className="search-input"
-                    type="text"
-                    placeholder="Rechercher un Pokémon..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            </div>
-            <div className="filter-bar">
-                <select onChange={(e) => setTypeFilter(e.target.value)}>
-                    <option value="">Tous les types</option>
-                    {pokemonTypes.map(type => (
-                        <option value={type}>{type}</option>
-                    ))}
-                </select>
-                <select onChange={(e) => setSortOrder(e.target.value)}>
-                    <option value="">Trier par...</option>
-                    <option value="asc">Ordre alphabétique (A-Z)</option>
-                    <option value="desc">Ordre alphabétique inversé (Z-A)</option>
-                </select>
-            </div>
-            <div className="pokemonList">
-                {currentPokemons.map(pokemon => (
-                    <div className="pokemonName" key={pokemon.name}>
-                        <PokeCard pokemon={pokemon} />
-                        <button onClick={() => handleViewEvolutions(pokemon)}>Voir Ses Caractéristiques</button>
+            {isLoading ? (
+                <p>Chargement des pokemons...</p>
+            ) : (
+                <>
+                    <div className="search-bar">
+                        <input
+                            className="search-input"
+                            type="text"
+                            placeholder="Rechercher un Pokémon..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
-                ))}
-            </div>
-            <div className="pagination">
-                <button onClick={goToPreviousPage} hidden={currentPage === 1}>Précédent</button>
-                <span className='nombrePage'>Page {currentPage} sur {totalPages}</span>
-                <button onClick={goToNextPage} hidden={currentPage === totalPages}>Suivant</button>
-            </div>
-            {showEvolutionPopup && selectedPokemon && (
-                <EvolutionPopup
-                    pokemonId={selectedPokemon.url}
-                    pokemonDetails={selectedPokemon}
-                    onClose={handleClosePopup}
-                />
+                    <div className="filter-bar">
+                        <select onChange={(e) => setTypeFilter(e.target.value)}>
+                            <option value="">Tous les types</option>
+                            {pokemonTypes.map(type => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </select>
+                        <select onChange={(e) => setSortOrder(e.target.value)}>
+                            <option value="">Trier par...</option>
+                            <option key="asc" value="asc">Ordre alphabétique (A-Z)</option>
+                            <option key="desc" value="desc">Ordre alphabétique inversé (Z-A)</option>
+                        </select>
+                        {team.length > 0 && (
+                            <div className='pokeTeam'>
+                                <button onClick={removeLastPokemon}>Supprimer le dernier Pokémon</button>
+                                <button onClick={clearTeam}>Vider l'équipe</button>
+                            </div>
+                        )}
+                    </div>
+                    <div className="pokemonList">
+                        {currentPokemons.map(pokemon => (
+                            <div className="pokemonName" key={pokemon.name}>
+                                <PokeCard pokemon={pokemon} />
+                                <button onClick={() => handleViewEvolutions(pokemon)}>Voir Ses Caractéristiques</button>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="pagination">
+                        <button onClick={goToPreviousPage} hidden={currentPage === 1}>Précédent</button>
+                        <span className='nombrePage'>Page {currentPage} sur {totalPages}</span>
+                        <button onClick={goToNextPage} hidden={currentPage === totalPages}>Suivant</button>
+                    </div>
+                    {showEvolutionPopup && selectedPokemon && (
+                        <EvolutionPopup
+                            pokemonId={selectedPokemon.url}
+                            pokemonDetails={selectedPokemon}
+                            onClose={handleClosePopup}
+                            onAddToTeam={handleAddToTeam}
+                        />
+                    )}
+                </>
             )}
         </div>
     );

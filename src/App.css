@@ -231,10 +231,14 @@ button:hover {
 }
 
 .filter-bar {
-  margin-top: 50px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-around;
-  margin-bottom: 20px;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 1280px;
+  padding: 2rem;
+  text-align: center;
 }
 
 .filter-bar select {
@@ -246,6 +250,23 @@ button:hover {
   color: #495057;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-bottom: 25px;
+}
+
+.pokeTeam {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 1280px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.pokeTeam button {
+  margin-bottom: 25px;
 }
 
 .filter-bar select:hover {
