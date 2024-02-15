@@ -90,7 +90,9 @@ const PokeList = () => {
         setCurrentPage(1);
     }, [typeFilter, sortOrder]);
 
-    const filteredPokemons = typeFilter ? pokemons.filter(pokemon => pokemon.types.includes(pokemonTypeMapping[typeFilter])) : pokemons;
+    const filteredPokemons = pokemons
+    .filter(pokemon => typeFilter ? pokemon.types.includes(pokemonTypeMapping[typeFilter]) : true)
+    .filter(pokemon => pokemon.name.toLowerCase().startsWith(searchTerm.toLowerCase()));
 
     const sortedPokemons = [...filteredPokemons].sort((a, b) => {
         if (sortOrder === 'asc') {
