@@ -5,8 +5,8 @@ import EvolutionPopup from './EvolutionPopup';
 
 export interface Pokemon {
     evolutionChainId: any;
-    name: string;
     englishName?: string;
+    name: string;
     url: string;
     imageUrl?: string;
     types: string[];
