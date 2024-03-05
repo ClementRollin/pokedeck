@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import PokeCard from './PokeCard';
 import EvolutionPopup from './EvolutionPopup';
+import TeamPopup from './TeamPopup';
 
 export interface Pokemon {
+    image: string | undefined;
     evolutionChainId: any;
     englishName?: string;
     name: string;
@@ -25,6 +27,7 @@ const PokeList = () => {
     const [typeFilter, setTypeFilter] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<string | null>(null);
     const [team, setTeam] = useState<string[]>([]);
+    const [showTeamPopup, setShowTeamPopup] = useState(false);
 
     const pokemonTypes = ['feu', 'eau', 'plante', 'vol', 'insecte', 'poison', 'normal', 'électrik', 'sol', 'fée', 'combat', 'psy', 'roche', 'acier', 'glace', 'spectre'];
 
@@ -214,6 +217,10 @@ const PokeList = () => {
         document.body.style.overflow = 'auto';
     };
 
+    const handleShowTeam = () => {
+        setShowTeamPopup(true);
+    };
+
     return (
         <div>
             {isLoading ? (
@@ -248,6 +255,7 @@ const PokeList = () => {
                         )}
                         {team.length > 0 && (
                             <div className='pokeTeam'>
+                                <button onClick={handleShowTeam}>Voir mon équipe</button>
                                 <button onClick={removeLastPokemon}>Supprimer le dernier Pokémon</button>
                                 <button onClick={clearTeam}>Vider l'équipe</button>
                             </div>
@@ -276,6 +284,13 @@ const PokeList = () => {
                             pokemonDetails={selectedPokemon}
                             onClose={handleClosePopup}
                             onAddToTeam={handleAddToTeam}
+                        />
+                    )}
+                    {showTeamPopup && (
+                        <TeamPopup
+                            team={team}
+                            pokemons={pokemons}
+                            onClose={() => setShowTeamPopup(false)}
                         />
                     )}
                 </>
