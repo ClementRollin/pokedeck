@@ -346,3 +346,17 @@ button:hover {
   padding: 0;
   text-align: left;
 }
+
+.pokemonId {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.texteEquipe {
+  margin-top: 20px;
+  border-radius: 5px;
+  width: 100%;
+  padding: 1px 50px 1px 50px;
+  background-color: #ffcb05;
+}

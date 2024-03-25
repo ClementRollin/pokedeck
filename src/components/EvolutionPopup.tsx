@@ -93,11 +93,11 @@ const EvolutionPopup: React.FC<EvolutionPopupProps> = ({ pokemonDetails, onClose
             <div className="backdrop" onClick={onClose}></div>
             <div className="evolution-popup">
                 <h2>Détails du Pokémon</h2>
-                <div>
+                <div className='pokemonId'>
                     <img src={pokemonDetails.imageUrl} alt={pokemonDetails.name} />
                     <p>Types: {pokemonDetails.types.join(', ')}</p>
                     {team.includes(pokemonDetails.name)
-                        ? <p>Ce Pokémon fait déjà partie de votre équipe !</p>
+                        ? <div className='texteEquipe'><p>Ce Pokémon fait déjà partie de votre équipe !</p></div>
                         : <button onClick={() => handleAddToTeam(pokemonDetails.name)}>Ajouter à mon équipe</button>}
                 </div>
                 <div>
