@@ -87,14 +87,16 @@ const EvolutionPopup: React.FC<EvolutionPopupProps> = ({ pokemonDetails, onClose
                 </div>
                 <div>
                     <h3>Statistiques</h3>
-                    {Object.entries(pokemonDetails.stats || {}).map(([statName, statValue]) => (
-                        <div className='statsPokemon' key={statName}>
-                            <p>{statName}: {statValue}</p>
-                            <div className="stat-bar">
-                                <div className="stat-bar-fill" style={{ width: `${(statValue / 150) * 100}%` }}></div>
+                    <div className="statsContent">
+                        {Object.entries(pokemonDetails.stats || {}).map(([statName, statValue]) => (
+                            <div className='statsPokemon' key={statName}>
+                                <p>{statName}: {statValue}</p>
+                                <div className="stat-bar">
+                                    <div className="stat-bar-fill" style={{ width: `${(statValue / 150) * 100}%` }}></div>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
                 <h2>Évolutions</h2>
                 {isLoading ? (
