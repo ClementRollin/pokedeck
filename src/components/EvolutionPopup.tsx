@@ -26,6 +26,7 @@ interface EvolutionDetail {
 const EvolutionPopup: React.FC<EvolutionPopupProps> = ({ pokemonDetails, onClose, onAddToTeam }) => {
     const [evolutionDetails, setEvolutionDetails] = useState<EvolutionDetail[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [team, setTeam] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchEvolutionChain = async () => {
@@ -75,6 +76,18 @@ const EvolutionPopup: React.FC<EvolutionPopupProps> = ({ pokemonDetails, onClose
         fetchEvolutionChain();
     }, [pokemonDetails]);
 
+    useEffect(() => {
+        const savedTeam = localStorage.getItem('team');
+        if (savedTeam) {
+            setTeam(JSON.parse(savedTeam));
+        }
+    }, []);
+
+    const handleAddToTeam = (pokemonName: string) => {
+        onAddToTeam(pokemonName);
+        setTeam(prevTeam => [...prevTeam, pokemonName]);
+    };
+
     return (
         <>
             <div className="backdrop" onClick={onClose}></div>
@@ -83,7 +96,9 @@ const EvolutionPopup: React.FC<EvolutionPopupProps> = ({ pokemonDetails, onClose
                 <div>
                     <img src={pokemonDetails.imageUrl} alt={pokemonDetails.name} />
                     <p>Types: {pokemonDetails.types.join(', ')}</p>
-                    <button onClick={() => onAddToTeam(pokemonDetails.name)}>Ajouter à mon équipe</button>
+                    {team.includes(pokemonDetails.name)
+                        ? <p>Ce Pokémon fait déjà partie de votre équipe !</p>
+                        : <button onClick={() => handleAddToTeam(pokemonDetails.name)}>Ajouter à mon équipe</button>}
                 </div>
                 <div>
                     <h3>Statistiques</h3>

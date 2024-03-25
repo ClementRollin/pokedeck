@@ -55,7 +55,7 @@ const PokeList = () => {
     useEffect(() => {
         const fetchPokemons = async () => {
             setIsLoading(true);
-            const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=150');
+            const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=100');
             const pokemonsWithImages = await Promise.all(response.data.results.map(async (pokemon: Pokemon) => {
                 const pokemonResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon.name}`);
                 const types = pokemonResponse.data.types.map((type: any) => type.type.name);
