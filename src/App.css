@@ -340,3 +340,9 @@ button:hover {
 .statsContent p {
   width: 150px;
 }
+
+.ulStats {
+  list-style-type: none;
+  padding: 0;
+  text-align: left;
+}

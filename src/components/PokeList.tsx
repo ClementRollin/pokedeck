@@ -160,9 +160,11 @@ const PokeList = () => {
 
     const generateRandomTeam = () => {
         const randomTeam = [];
+        let pokemonsCopy = [...pokemons];
         for (let i = 0; i < 6; i++) {
-            const randomIndex = Math.floor(Math.random() * pokemons.length);
-            randomTeam.push(pokemons[randomIndex].name);
+            const randomIndex = Math.floor(Math.random() * pokemonsCopy.length);
+            randomTeam.push(pokemonsCopy[randomIndex].name);
+            pokemonsCopy = pokemonsCopy.filter((_, index) => index !== randomIndex);
         }
         setTeam(randomTeam);
         localStorage.setItem('team', JSON.stringify(randomTeam));
