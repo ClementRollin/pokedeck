@@ -48,7 +48,7 @@ body {
   transform: scale(1.05);
 }
 
-.evolution-popup {
+.evolution-popup, .teamPopup {
   position: fixed;
   height: 100%;
   top: 50%;
