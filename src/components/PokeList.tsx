@@ -184,9 +184,10 @@ const PokeList = () => {
 
     const removeLastPokemon = () => {
         const newTeam = [...team];
-        newTeam.pop();
+        const removedPokemon = newTeam.pop();
         setTeam(newTeam);
         localStorage.setItem('team', JSON.stringify(newTeam));
+        alert(`${removedPokemon} a été supprimé de votre équipe, il vous reste ${newTeam.length} Pokémon.`);
     };
     
     const clearTeam = () => {
